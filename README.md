@@ -27,6 +27,33 @@ Browser (Next.js Client Components)
   -> External APIs (Authorize.net, GHL, Zapier, Shipedge)
 ```
 
+### 2.1 Flow Diagram
+
+```mermaid
+flowchart TD
+  A[Storefront UI<br/>Services Pages + Product Cards] --> B[Cart Context<br/>localStorage h4m_cart]
+  B --> C[Checkout UI<br/>Customer -> Shipping -> Review -> Payment]
+
+  C --> D1[POST /api/checkout/create-order]
+  C --> D2[POST /api/checkout/process-payment]
+  C --> D3[POST /api/checkout/confirm-order]
+
+  D1 --> E1[Supabase Edge: create-order]
+  D2 --> E2[Supabase Edge: process-payment]
+  D3 --> E3[Supabase Edge: confirm-order]
+
+  E1 --> F[(Supabase Postgres<br/>orders + order_items)]
+  E2 --> G[Authorize.net]
+  E3 --> H[Integrations<br/>Zapier + GHL + Shipedge]
+  E3 --> F
+
+  I[Confirmation Page<br/>/checkout/confirmation/:orderId] --> J[GET /api/orders/:orderId]
+  J --> K[Supabase Edge: get-order]
+  K --> F
+
+  I --> L[Analytics<br/>GA4/GTM + Convertmax purchase]
+```
+
 ## 3. Runtime Boundaries
 
 ### 3.1 Storefront and Checkout UI (Client)
@@ -342,4 +369,3 @@ Used in Next routes and/or Edge functions:
 - Supabase functions: `supabase/functions/*`
 - Schema: `supabase-create-database.sql`
 - Tracking doc: `docs/TRACKING.md`
-
